@@ -1,0 +1,171 @@
+{
+  "verticles": [
+    /*entry point for MySQLVerticle*/
+    {
+      "name": "MySQLVerticle",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.gateway.internal.db.mysql.MySQLVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1
+    },
+    /*deploy module for mservice~mongo~1.0*/
+    {
+      "name": "mservice~mongo~1.0",
+      "block": true,
+      "address": "mservice~mongo~1.0",
+      //optional adress of this verticle
+      "thread": true,
+      //optional is this verticle consume local/cluster message
+      "isModule": true,
+      "posModule": 1,
+      "instances": 1
+    },
+    /*entry point for mservice~mongo_noti~1.0*/
+    {
+      "name": "mservice~mongo_noti~1.0",
+      "block": true,
+      // if true => worker, false -> normal
+      "address": "mservice~mongo_noti~1.0",
+      //optional adress of this verticle
+      "thread": true,
+      //optional is this verticle consume local/cluster message
+      "isModule": true,
+      "posModule": 2,
+      "instances": 1
+    },
+    /*entry point for PromotionVerticle*/
+    {
+      "name": "PromotionVerticle",
+      "block": true,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.PromotionVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1
+    },
+    /*entry point for LStandbyOracleVerticle*/
+    {
+      "name": "LStandbyOracleVerticle",
+      "block": true,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.gateway.internal.db.oracle.LStandbyOracleVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1
+    },
+    /*entry point for UMarketOracleVerticle*/
+    {
+      "name": "UMarketOracleVerticle",
+      "block": true,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.gateway.internal.db.oracle.UMarketOracleVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1
+    },
+    /*entry point for LocationVerticle*/
+    {
+      "name": "LocationVerticle",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.LocationVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 0
+    },
+    /*entry point for ServiceConfVerticle*/
+    {
+      "name": "ServiceConfVerticle",
+      "block": true,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.ServiceConfVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1
+    },
+    {
+      "name": "PromotionServerVerticle",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.promotion_server.PromotionServerVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1,
+      "isDeployed": false
+    },
+    {
+      "name": "MainPromotionVerticle",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.promotion_server.MainPromotionVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1,
+      "isDeployed": true
+    },
+    {
+      "name": "VicpromoVerticle",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.promotion_verticle.VicpromoVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1
+    },
+    {
+      "name": "BinhTanPromotionExtend",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.promotion_verticle.BinhTanPromotionExtend",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1,
+      "isDeployed": true
+    },
+    {
+      "name": "RecheckPromotionVerticle",
+      "block": false,
+      // if true => worker, false -> normal
+      "address": "com.mservice.momo.vertx.promotion_verticle.RecheckPromotionVerticle",
+      //optional adress of this verticle
+      "thread": true,
+      //true => multiThread
+      "isModule": false,
+      "posModule": 0,
+      "instances": 1,
+      "isDeployed": true
+    }
+  ]
+}
