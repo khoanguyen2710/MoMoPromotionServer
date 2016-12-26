@@ -2,8 +2,15 @@ package db;
 
 import com.mongodb.*;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Log4j2LogDelegate;
+import io.vertx.core.logging.Log4jLogDelegate;
 import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.spi.logging.LogDelegate;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.net.UnknownHostException;
@@ -13,7 +20,7 @@ import java.util.List;
 /**
  * Created by KhoaNguyen on 12/26/2016.
  */
-public class MongoBase extends AbstractVerticle{
+public class MongoBase extends AbstractVerticle implements Handler<Message<Object>> {
 
     public static final int DUPLICATE_CODE_ERROR = 11000;
     public String host;
@@ -30,9 +37,10 @@ public class MongoBase extends AbstractVerticle{
     protected Mongo mongo;
     protected DB db;
     protected Logger logger;
+    protected JsonObject config;
     public void LoadCfg(JsonObject mongoCfg) {
-        logger = Logger.getLogger(this.getClass().getSimpleName());
-        logger = new Logger();
+        config = config();
+        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
         host = mongoCfg.getString("host", "localhost");
         port = mongoCfg.getInteger("port", 27017);
         dbName = mongoCfg.getString("db_name", "default_db");
@@ -51,23 +59,39 @@ public class MongoBase extends AbstractVerticle{
 
         LoadCfg(config());
         logger.info(busAddress + " - start()");
-        JsonArray seedsProperty = config.getArray("seeds");
+        JsonArray seedsProperty = config.getJsonArray("seeds");
 
-        try {
-            MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-            builder.connectionsPerHost(poolSize);
-            builder.socketTimeout(socketTimeout);
+        MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+        builder.connectionsPerHost(poolSize);
+        builder.socketTimeout(socketTimeout);
 
-            //builder.requiredReplicaSetName("newmomo");
+        //builder.requiredReplicaSetName("newmomo");
 
-            if (useSSL) {
-                builder.socketFactory(SSLSocketFactory.getDefault());
+        if (useSSL) {
+            builder.socketFactory(SSLSocketFactory.getDefault());
+        }
+
+        if (seedsProperty == null) {
+            ServerAddress address = new ServerAddress(host, port);
+            ArrayList<MongoCredential> mongoCredentials = new ArrayList<MongoCredential>();
+            if (username != null && password != null) {
+                mongoCredentials.add(
+                        MongoCredential.createMongoCRCredential(
+                                username
+                                ,dbName
+                                ,password.toCharArray())
+                );
             }
+            mongo = new MongoClient(address,mongoCredentials, builder.build());
+        } else {
+//                List<ServerAddress> seeds = makeSeeds(seedsProperty);
+            List<ServerAddress> seeds = new ArrayList<ServerAddress>();
+            //primary down, nearest secondary will be primary node
+            builder.readPreference(ReadPreference.secondaryPreferred());
 
-            if (seedsProperty == null) {
-                ServerAddress address = new ServerAddress(host, port);
-                ArrayList<MongoCredential> mongoCredentials = new ArrayList<>();
-                if (username != null && password != null) {
+            ArrayList<MongoCredential> mongoCredentials = new ArrayList<MongoCredential>();
+            if (username != null && password != null) {
+                for (int i=0; i<seeds.size(); i++){
                     mongoCredentials.add(
                             MongoCredential.createMongoCRCredential(
                                     username
@@ -75,48 +99,32 @@ public class MongoBase extends AbstractVerticle{
                                     ,password.toCharArray())
                     );
                 }
-                mongo = new MongoClient(address,mongoCredentials, builder.build());
+                mongo = new MongoClient(seeds, mongoCredentials,builder.build());
+
+                //operations read will be execute on secondary
+                mongo.setReadPreference(ReadPreference.secondaryPreferred());
             } else {
-                List<ServerAddress> seeds = makeSeeds(seedsProperty);
-
-                //primary down, nearest secondary will be primary node
-                builder.readPreference(ReadPreference.secondaryPreferred());
-
-                ArrayList<MongoCredential> mongoCredentials = new ArrayList<>();
-                if (username != null && password != null) {
-                    for (int i=0; i<seeds.size(); i++){
-                        mongoCredentials.add(
-                                MongoCredential.createMongoCRCredential(
-                                        username
-                                        ,dbName
-                                        ,password.toCharArray())
-                        );
-                    }
-                    mongo = new MongoClient(seeds, mongoCredentials,builder.build());
-
-                    //operations read will be execute on secondary
-                    mongo.setReadPreference(ReadPreference.secondaryPreferred());
-                } else {
-                    mongo = new MongoClient(seeds, builder.build());
-                }
+                mongo = new MongoClient(seeds, builder.build());
             }
+        }
 
-            db = mongo.getDB(dbName);
+        db = mongo.getDB(dbName);
 //            if (username != null && password != null) {
 //                db.authenticate(username, password.toCharArray());
 //            }
 
-            logger.debug("Connect to Mongo server done - use : " + host + ":" + port + "/" + dbName);
+        logger.debug("Connect to Mongo server done - use : " + host + ":" + port + "/" + dbName);
 
-        } catch (UnknownHostException e) {
-            logger.debug("Failed to connect to Mongo server:port/ " + host + ":" + port, e);
-        }
-        String fullBusAddress = AppConstant.PREFIX + busAddress;
-
+        //        String fullBusAddress = AppConstant.PREFIX + busAddress;
+        String fullBusAddress = busAddress;
         logger.info("fullBusAddress: " + fullBusAddress);
 
 //        aggregateStages();
 
-        eb.registerLocalHandler(fullBusAddress, this);
+        vertx.eventBus().consumer(fullBusAddress, this);
+    }
+
+    public void handle(Message<Object> event) {
+
     }
 }
