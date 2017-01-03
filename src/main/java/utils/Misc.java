@@ -1,6 +1,13 @@
 package utils;
 
+import data.AppConstant;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import promotion.Promo;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -46,5 +53,35 @@ public class Misc {
             }
         }
         return jsonObject;
+    }
+
+    public static boolean isValidJsonArray(String jarray) {
+        return jarray.startsWith("[") && jarray.endsWith("]");
+    }
+
+    public static boolean isValidJsonObject(String text) {
+        try {
+            JsonObject jsonObject = new JsonObject(text);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void requestPromoRecord(Vertx _vertx
+            , Promo.PromoReqObj promoReq
+            , final Logger logger
+            , final Handler<JsonObject> callback) {
+
+        DeliveryOptions deliveryOptions = new DeliveryOptions();
+        deliveryOptions.setSendTimeout(60000);
+        _vertx.eventBus().send(AppConstant.Promotion_ADDRESS
+                , promoReq.toJsonObject(), deliveryOptions, message -> {
+                    if (message.succeeded()) {
+                        callback.handle((JsonObject)message.result().body());
+                    } else {
+                        callback.handle(new JsonObject());
+                    }
+                });
     }
 }

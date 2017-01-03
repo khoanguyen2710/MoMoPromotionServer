@@ -1,4 +1,4 @@
-package db;
+package data;
 
 /**
  * Created by khoanguyen on 12/29/16.
@@ -68,5 +68,14 @@ public class colName {
         public static String ADDRESSNAME = "addressName";
         public static String ISVERTICLE = "isVerticle";
         public static String EXTRA = "extra";
+    }
+
+    public static class ConnectorHTTPPostPath {
+        public static String SERVICE_ID = "_id";
+        public static String PATH = "path";
+        public static String HOST = "host";
+        public static String PORT = "port";
+        public static String VERSION = "version";
+        public static String TABLE = "ConnectorHTTPPostPathDb";
     }
 }

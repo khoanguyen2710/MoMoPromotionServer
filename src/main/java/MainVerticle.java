@@ -2,11 +2,12 @@ import data.VerticleString;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import utils.Misc;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.logging.Logger;
 
 /**
  * Created by KhoaNguyen on 12/26/2016.
@@ -18,7 +19,7 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        logger = Logger.getLogger(this.getClass().getSimpleName());
+        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
         joConfig = config();
         JsonObject jsonVerticles = Misc.readJsonObjectFile("verticle.json");
 
